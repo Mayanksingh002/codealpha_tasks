@@ -1,0 +1,13 @@
+import streamlit as st,joblib,json,pandas as pd,plotly.express as px
+st.set_page_config(page_title="CardioGuard AI",page_icon="🫀",layout="wide")
+st.title("🫀 CardioGuard AI")
+st.caption("Medical ML • Model Comparison • Risk-Aware Dashboard")
+st.warning("Educational demonstration only — not a diagnosis or clinical decision tool.")
+try:data=json.load(open("artifacts/metrics.json"));model=joblib.load("artifacts/disease_model.joblib")
+except:st.error("Run python train.py first.");st.stop()
+m=data["test_metrics"];a,b,c,d=st.columns(4);a.metric("Accuracy",f"{m['accuracy']:.2%}");b.metric("F1",f"{m['f1']:.3f}");c.metric("ROC-AUC",f"{m['roc_auc']:.3f}");d.metric("Recall",f"{m['recall']:.3f}")
+df=pd.DataFrame(data["cv_results"]).T.reset_index(names="Model")
+st.subheader("Model comparison");st.dataframe(df.style.format({x:"{:.3f}" for x in df.columns if x!="Model"}),use_container_width=True)
+st.plotly_chart(px.bar(df,x="Model",y="roc_auc",title="Cross-validation ROC-AUC"),use_container_width=True)
+st.subheader("🛡️ Responsible AI")
+st.write("A real clinical deployment requires external validation, calibration, subgroup analysis, prospective testing, privacy/security controls and qualified clinician oversight.")
